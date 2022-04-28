@@ -1,11 +1,11 @@
 export class Game {
-    private _letplayers: String[] = [];
-    private _stack: String[] = [];
-    private _playedCards: String[] = [];
+    private _letplayers: string[] = [];
+    private _stack: string[] = [];
+    private _playedCards: string[] = [];
     private _currentPlayer: number = 0;
 
     constructor() {
-        for (let i = 1; i < 14; i++) {
+        for (let i = 0; i < 14; i++) {
             this._stack.push('spade_' + i)
             this._stack.push('hearts_' + i)
             this._stack.push('clubs_' + i)
@@ -15,27 +15,27 @@ export class Game {
         shuffle(this._stack);
     }
     
-    public get letplayers(): String[] {
+    public get letplayers(): string[] {
         return this._letplayers;
     }
 
-    public set letplayers(value: String[]) {
+    public set letplayers(value: string[]) {
         this._letplayers = value;
     }
 
-    public get stack(): String[] {
+    public get stack(): string[] {
         return this._stack;
     }
 
-    public set stack(value: String[]) {
+    public set stack(value: string[]) {
         this._stack = value;
     }
 
-    public get playedCards(): String[] {
+    public get playedCards(): string[] {
         return this._playedCards;
     }
 
-    public set playedCards(value: String[]) {
+    public set playedCards(value: string[]) {
         this._playedCards = value;
     }
 
@@ -48,7 +48,7 @@ export class Game {
     }
 }
 
-function shuffle(array: String[]) {
+function shuffle(array: string[]) {
     let currentIndex: number = array.length,  randomIndex;
   
     // While there remain elements to shuffle.
