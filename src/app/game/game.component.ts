@@ -3,23 +3,43 @@ import { Game } from 'src/models/game';
 import { MatDialog } from '@angular/material/dialog';
 import { DialogAddPlayerComponent } from '../dialog-add-player/dialog-add-player.component';
 
+import { ActivatedRoute } from '@angular/router';
+import { AngularFirestore } from '@angular/fire/compat/firestore';
+
 @Component({
   selector: 'app-game',
   templateUrl: './game.component.html',
   styleUrls: ['./game.component.scss']
 })
 export class GameComponent implements OnInit {
-  private _pickCardAnimation: boolean = false;
   private _game!: Game;
-  private _curentCard!: string;
   private names: string[] = [];
+  private _gameId!: string;
+  
 
-  constructor(public dialog: MatDialog) {
-    this.pickCardAnimation = false;
+  constructor(private route: ActivatedRoute, private firestore: AngularFirestore, public dialog: MatDialog) {
+    this.game.pickCardAnimation = false;
   }
 
   ngOnInit(): void {
     this.newGame();
+    this.route.params.subscribe((params) => {
+      this.gameId = params['id'];
+
+      this
+      .firestore
+      .collection('games')
+      .doc(this.gameId)
+      .valueChanges()
+      .subscribe((game: any) => {
+        this.game.currentPlayer = game.currentPlayer;
+        this.game.playedCards = game.playedCards;
+        this.game.letplayers = game.player;
+        this.game.stack = game.stack;
+        this.game.pickCardAnimation = game.pickCardAnimation;
+        this.game.curentCard = game.curentCard;
+      });
+    });
   }
 
   newGame() {
@@ -27,14 +47,16 @@ export class GameComponent implements OnInit {
   }
 
   takeCard() {
-    if (!this.pickCardAnimation) {
-      this.pickCardAnimation = true;
-      this.curentCard = this.game.stack.pop() as string;
+    if (!this.game.pickCardAnimation) {
+      this.game.pickCardAnimation = true;
+      this.game.curentCard = this.game.stack.pop() as string;
       this._game.currentPlayer++;
       this._game.currentPlayer = this._game.currentPlayer % this._game.letplayers.length;
+      this.updateGame();
       setTimeout(() => {
-        this.pickCardAnimation = false;
-        this.game.playedCards.push(this.curentCard);
+        this.game.pickCardAnimation = false;
+        this.game.playedCards.push(this.game.curentCard);
+        this.updateGame();
       }, 1000);
     }
   }
@@ -47,14 +69,17 @@ export class GameComponent implements OnInit {
       if (name && name.length > 0) {
         this.names.push(name);
         this.game.letplayers = this.names;
+        this.updateGame();
       }
     });
   }
-  public get curentCard(): string {
-    return this._curentCard;
-  }
-  public set curentCard(value: string) {
-    this._curentCard = value;
+
+  updateGame() {
+    this
+      .firestore
+      .collection('games')
+      .doc(this.gameId)
+      .update(this.game.toJson())
   }
 
   public get game(): Game {
@@ -63,10 +88,10 @@ export class GameComponent implements OnInit {
   public set game(value: Game) {
     this._game = value;
   }
-  public get pickCardAnimation(): boolean {
-    return this._pickCardAnimation;
+  public get gameId(): string {
+    return this._gameId;
   }
-  public set pickCardAnimation(value: boolean) {
-    this._pickCardAnimation = value;
+  public set gameId(value: string) {
+    this._gameId = value;
   }
 }
